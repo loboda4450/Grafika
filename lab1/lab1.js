@@ -1,0 +1,200 @@
+startGL()
+
+function startGL()
+{
+    let canvas = document.getElementById("canvas"); //wyszukanie obiektu w strukturze strony
+    let gl = canvas.getContext("experimental-webgl"); //pobranie kontekstu OpenGL'u z obiektu canvas
+    gl.viewportWidth = canvas.width; //przypisanie wybranej przez nas rozdzielczości do systemu OpenGL
+    gl.viewportHeight = canvas.height;
+
+    //Kod shaderów
+    const vertextShaderSource = ` //Znak akcentu z przycisku tyldy - na lewo od przycisku 1 na klawiaturze
+    attribute vec3 aVertexPosition; 
+    uniform mat4 uMVMatrix;
+    uniform mat4 uPMatrix;
+    void main(void) {
+      gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0); //Dokonanie transformacji położenia punktów z przestrzeni 3D do przestrzeni obrazu (2D)
+    }
+  `;
+
+    const fragmentShaderSource = `
+    void main(void) {
+       gl_FragColor = vec4(0.0,1.0,0.0,1.0); //Ustalenie stałego koloru wszystkich punktów sceny
+    }
+  `;
+
+    let fragmentShader = gl.createShader(gl.FRAGMENT_SHADER); //Stworzenie obiektu shadera
+    let vertexShader   = gl.createShader(gl.VERTEX_SHADER);
+    gl.shaderSource(fragmentShader, fragmentShaderSource); //Podpięcie źródła kodu shader
+    gl.shaderSource(vertexShader, vertextShaderSource);
+    gl.compileShader(fragmentShader); //Kompilacja kodu shader
+    gl.compileShader(vertexShader);
+    if (!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)) { //Sprawdzenie ewentualnych błedów kompilacji
+        alert(gl.getShaderInfoLog(fragmentShader));
+        return null;
+    }
+    if (!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)) {
+        alert(gl.getShaderInfoLog(vertexShader));
+        return null;
+    }
+
+    let shaderProgram = gl.createProgram(); //Stworzenie obiektu programu
+    gl.attachShader(shaderProgram, vertexShader); //Podpięcie obu shaderów do naszego programu wykonywanego na karcie graficznej
+    gl.attachShader(shaderProgram, fragmentShader);
+    gl.linkProgram(shaderProgram);
+    if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) alert("Could not initialise shaders");  //Sprawdzenie ewentualnych błedów
+
+    let vertexPosition = [
+        // //Top vertical
+        //     A                 B                 E
+        -0.1, +1, +0.25,  +0.1, +1, +0.25,  -0.1, +1, +0.05,
+        //     E                 F                 B
+        -0.1, +1, +0.05,  +0.1, +1, +0.05,  +0.1, +1, +0.25,
+
+        // //Top diagonal
+        //   I                   J                    N
+        -0.5, -0.1, +0.25,  +0.5, +0.25, +0.25,  +0.5, +0.25, +0.05,
+        //   N                    M                  I
+        +0.5, +0.25, +0.05,  -0.5, -0.1, +0.05,  -0.5, -0.1, +0.25,
+
+        // //Top horizontal
+        //   P                    R                    X
+        0, -0.8, +0.25,  +0.75, -0.8, +0.25,  +0.75, -0.8, +0.05,
+        //       X               W               P
+        +0.75, -0.8, +0.05,  0, -0.8, +0.05,  0, -0.8, +0.25,
+
+        // //Left vertical
+        //     C                 G                 E
+        -0.1, +1, +0.25,  -0.1, -1, +0.05,  -0.1, +1, +0.05,
+        //     E                 A                 C
+        -0.1, +1, +0.05,  -0.1, +1, +0.25,  -0.1, +1, +0.25,
+
+        // //Left diagonal
+        //      I                   K                    O
+        -0.5, -0.1, +0.25,  -0.5, -0.25, +0.25,  -0.5, -0.25, 0.05,
+        //      O                   M                   I
+        -0.5, -0.25, 0.05,  -0.5, -0.1, +0.05,  -0.5, -0.1, +0.25,
+
+        // //Left horizontal
+        //   P               S              Y
+        0, -0.8, +0.25,  0, -1, +0.25,  0, -1, +0.05,
+        //  Y               W                P
+        0, -1, +0.05,  0, -0.8, +0.05,  0, -0.8, +0.25,
+
+        // //Right vertical
+        //     D                 H                 F
+        +0.1, -1, +0.25,  +0.1, -1, +0.05,  +0.1, +1, +0.05,
+        //     F                 B                 D
+        +0.1, +1, +0.05,  +0.1, +1, +0.25,  +0.1, -1, +0.25,
+
+        // //Right diagonal
+        //      L                    J                   N
+        +0.5, +0.1, +0.25,  +0.5, +0.25, +0.25,  +0.5, +0.25, +0.05,
+        //       N                  U                   L
+        +0.5, +0.25, +0.05, +0.5, +0.1, +0.05,  +0.5, +0.1, +0.25,
+
+        // //Right horizontal
+        //   R                       T                  Z
+        +0.75, -0.8, +0.25,  +0.75, -1, +0.25,  +0.75, -1, +0.05,
+        //      Z               X                    R
+        +0.75, -1, +0.05,  +0.75, -0.8, +0.05,  +0.75, -0.8, +0.25,
+
+        // //Front vertical
+        //     D                 C                 B
+        +0.1, -1, +0.25,  -0.1, -1, +0.25,  +0.1, +1, +0.25,
+        //     A                 B                 C
+        -0.1, +1, +0.25,  +0.1, +1, +0.25,  -0.1, -1, +0.25,
+
+        // //Front diagonal
+        //      L                   J                    K
+        +0.5, +0.1, +0.25,  +0.5, +0.25, +0.25,  -0.5, -0.25, +0.25,
+        //      I                   K                    J
+        -0.5, -0.1, +0.25,  -0.5, -0.25, +0.25,  +0.5, +0.25, +0.25,
+
+        // //Front horizontal
+        //      T                   R               S
+        +0.75, -1, +0.25,  +0.75, -0.8, +0.25,  0, -1, +0.25,
+        //   P               S                   R
+        0, -0.8, +0.25,  0, -1, +0.25,  +0.75, -0.8, +0.25,
+
+        // //Back vertical
+        //     G                H                  E
+        -0.1, -1, +0.05,  +0.1, -1, +0.05,  -0.1, +1, +0.05,
+        //     E                F                  H
+        -0.1, +1, +0.05,  +0.1, +1, +0.05,  +0.1, -1, +0.05,
+
+        // //Back diagonal
+        //      O                   U                   N
+        -0.5, -0.25, 0.05,  +0.5, +0.1, +0.05,  +0.5, +0.25, +0.05,
+        //      N                    M                   O
+        +0.5, +0.25, +0.05,  -0.5, -0.1, +0.05,  -0.5, -0.25, 0.05,
+
+        // //Back horizontal
+        //  Y                 Z                  X
+        0, -1, +0.05,  +0.75, -1, +0.05,  +0.75, -0.8, +0.05,
+        //       X          W                   Y
+        +0.75, -0.8, +0.05, 0, -0.8, +0.05, 0, -1, +0.05,
+
+        // //Bottom vertical
+        //     C                D                  G
+        -0.1, -1, +0.25,  +0.1, -1, +0.25,  -0.1, -1, +0.05,
+        //     G                H                  D
+        -0.1, -1, +0.05,  +0.1, -1, +0.05,  +0.1, -1, +0.25,
+
+        // //Botoom diagonal
+        //       K                   L                   U
+        -0.5, -0.25, +0.25,  +0.5, +0.1, +0.25,  +0.5, +0.1, +0.05,
+        //      U                   O                   K
+        +0.5, +0.1, +0.05,  +0.5, +0.1, +0.25,  -0.5, -0.25, +0.25,
+
+        // //Bottom horizontal
+        //  S                  T                  Z
+        0, -1, +0.25,  +0.75, -1, +0.25,  +0.75, -1, +0.05,
+        //      Z              Y              S
+        +0.75, -1, +0.05,  0, -1, +0.05,  0, -1, +0.25
+    ]
+
+    let vertexPositionBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertexPosition), gl.STATIC_DRAW);
+    vertexPositionBuffer.itemSize = 3;
+    vertexPositionBuffer.numItems = 36;
+
+
+    let aspect = gl.viewportWidth/gl.viewportHeight;
+    let fov = 45.0 * Math.PI / 180.0;
+    let zFar = 100.0;
+    let zNear = 0.1;
+    let uPMatrix = [
+        1.0/(aspect*Math.tan(fov/2)),0                           ,0                         ,0                            ,
+        0                         ,1.0/(Math.tan(fov/2))         ,0                         ,0                            ,
+        0                         ,0                           ,-(zFar+zNear)/(zFar-zNear)  , -1,
+        0                         ,0                           ,-(2*zFar*zNear)/(zFar-zNear) ,0.0,
+    ];
+    let angle = 0.0;
+    let uMVMatrix = [
+        Math.cos(angle*Math.PI/180.0),-Math.sin(angle*Math.PI/180.0),0,0,
+        Math.sin(angle*Math.PI/180.0),Math.cos(angle*Math.PI/180.0),0,0,
+        0,0,1,0.0,
+        0,0,-5,1
+    ];
+
+    gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+    gl.clearColor(1.0,0.0,0.0,1.0);
+    gl.clearDepth(1.0);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.useProgram(shaderProgram)
+
+    gl.enable(gl.DEPTH_TEST);
+    gl.depthFunc(gl.LEQUAL);
+
+    gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "uPMatrix"), false, new Float32Array(uPMatrix));
+    gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "uMVMatrix"), false, new Float32Array(uMVMatrix));
+
+    gl.enableVertexAttribArray(gl.getAttribLocation(shaderProgram, "aVertexPosition"));
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
+    gl.vertexAttribPointer(gl.getAttribLocation(shaderProgram, "aVertexPosition"), vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+    gl.drawArrays(gl.TRIANGLES, 0, vertexPositionBuffer.numItems*vertexPositionBuffer.itemSize);
+
+}
