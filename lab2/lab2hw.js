@@ -344,8 +344,8 @@ function Tick(){
     setTimeout(Tick,100);
 }
 
-function MatrixMul(a,b) {
-    let c = [
+function MatrixMul(aMatrix, bMatrix) {
+    let cMatrix = [
         0, 0, 0, 0,
         0, 0, 0, 0,
         0, 0, 0, 0,
@@ -355,12 +355,12 @@ function MatrixMul(a,b) {
     {
         for(let j=0;j<4;j++)
         {
-            c[i*4+j] = 0.0;
+            cMatrix[i*4+j] = 0.0;
             for(let k=0;k<4;k++)
             {
-                c[i*4+j]+= a[i*4+k] * b[k*4+j];
+                cMatrix[i*4+j]+= aMatrix[i*4+k] * bMatrix[k*4+j];
             }
         }
     }
-    return c;
+    return cMatrix;
 }
