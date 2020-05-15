@@ -1,11 +1,12 @@
 var gl;
 var shaderProgram;
 var uPMatrix;
+var uMVMatrix;
 var vertexPositionBuffer;
 var vertexColorBuffer;
-let angle = 0.0;
 
 function startGL() {
+    alert("Started webGL");
     let canvas = document.getElementById("canvas");
     gl = canvas.getContext("experimental-webgl");
     gl.viewportWidth = canvas.width;
@@ -264,14 +265,59 @@ function startGL() {
     Tick();
 }
 
+var angleZ = 0.0;
+var angleY = 0.0;
+var angleX = 0.0;
+var tz = -5.0;
+
+
 function Tick(){
-    angle+=1;
+    // Rotation steering
+    angleX+=1;
+    angleY+=1;
+    angleZ+=1;
+
     let uMVMatrix = [
-        Math.cos(angle*Math.PI/180.0),-Math.sin(angle*Math.PI/180.0),0,0,
-        Math.sin(angle*Math.PI/180.0),Math.cos(angle*Math.PI/180.0),0,0,
-        0,0,1,0.0,
-        0,0,-5,1
+        1,0,0,0,
+        0,1,0,0,
+        0,0,1,0,
+        0,0,0,1
     ];
+
+    let uMVRotZ = [
+        +Math.cos(angleZ*Math.PI/180.0),+Math.sin(angleZ*Math.PI/180.0),0,0,
+        -Math.sin(angleZ*Math.PI/180.0),+Math.cos(angleZ*Math.PI/180.0),0,0,
+        0,0,1,0,
+        0,0,0,1
+    ];
+
+    let uMVRotY = [
+        +Math.cos(angleY*Math.PI/180.0),0,-Math.sin(angleY*Math.PI/180.0),0,
+        0,1,0,0,
+        +Math.sin(angleY*Math.PI/180.0),0,+Math.cos(angleY*Math.PI/180.0),0,
+        0,0,0,1
+    ];
+
+    let uMVRotX = [
+        1,0,0,0,
+        0,+Math.cos(angleX*Math.PI/180.0),+Math.sin(angleX*Math.PI/180.0),0,
+        0,-Math.sin(angleX*Math.PI/180.0),+Math.cos(angleX*Math.PI/180.0),0,
+        0,0,0,1
+    ];
+
+    let uMVTranslateZ = [
+        1,0,0,0,
+        0,1,0,0,
+        0,0,1,0,
+        0,0,tz,1
+    ];
+
+    uMVMatrix = MatrixMul(uMVMatrix,uMVRotX);
+    uMVMatrix = MatrixMul(uMVMatrix,uMVRotY);
+    uMVMatrix = MatrixMul(uMVMatrix,uMVRotZ);
+    uMVMatrix = MatrixMul(uMVMatrix,uMVTranslateZ);
+
+    // until now
 
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     gl.clearColor(1.0,0.0,0.0,1.0);
@@ -282,15 +328,12 @@ function Tick(){
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
 
-    gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "uPMatrix"),
-        false, new Float32Array(uPMatrix));
-    gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "uMVMatrix"),
-        false, new Float32Array(uMVMatrix));
+    gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "uPMatrix"), false, new Float32Array(uPMatrix));
+    gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "uMVMatrix"), false, new Float32Array(uMVMatrix));
 
     gl.enableVertexAttribArray(gl.getAttribLocation(shaderProgram, "aVertexPosition"));
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexPositionBuffer);
-    gl.vertexAttribPointer(gl.getAttribLocation(shaderProgram, "aVertexPosition"),
-        vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(gl.getAttribLocation(shaderProgram, "aVertexPosition"), vertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
     gl.enableVertexAttribArray(gl.getAttribLocation(shaderProgram, "aVertexColor"));
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexColorBuffer);
@@ -298,5 +341,26 @@ function Tick(){
 
     gl.drawArrays(gl.TRIANGLES, 0, vertexPositionBuffer.numItems*vertexPositionBuffer.itemSize);
 
-    setTimeout(Tick, 100);
+    setTimeout(Tick,100);
+}
+
+function MatrixMul(a,b) {
+    let c = [
+        0, 0, 0, 0,
+        0, 0, 0, 0,
+        0, 0, 0, 0,
+        0, 0, 0, 0
+    ]
+    for(let i=0;i<4;i++)
+    {
+        for(let j=0;j<4;j++)
+        {
+            c[i*4+j] = 0.0;
+            for(let k=0;k<4;k++)
+            {
+                c[i*4+j]+= a[i*4+k] * b[k*4+j];
+            }
+        }
+    }
+    return c;
 }
