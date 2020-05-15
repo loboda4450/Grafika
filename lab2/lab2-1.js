@@ -1,5 +1,3 @@
-startGL()
-
 function startGL()
 {
     let canvas = document.getElementById("canvas");
