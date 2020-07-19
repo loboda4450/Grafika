@@ -141,24 +141,6 @@
       ];
     }
 
-    function MatrixMul(a, b) {
-      c = [
-        0, 0, 0, 0,
-        0, 0, 0, 0,
-        0, 0, 0, 0,
-        0, 0, 0, 0
-      ]
-      for (let i = 0; i < 4; i++) {
-        for (let j = 0; j < 4; j++) {
-          c[i * 4 + j] = 0.0;
-          for (let k = 0; k < 4; k++) {
-            c[i * 4 + j] += a[i * 4 + k] * b[k * 4 + j];
-          }
-        }
-      }
-      return c;
-    }
-
     function updateMousePosition(e) {
       yaw += e.movementX * mouse_sensitivity;
       while (yaw > Math.PI) yaw -= twoPI;          // 180deg
@@ -172,7 +154,7 @@
     function lockChangeAlert() {
       let canvas = document.getElementById('canvas3D');
       if (document.pointerLockElement === canvas ||
-        document.mozPointerLockElement === canvas) {
+              document.mozPointerLockElement === canvas) {
         document.addEventListener("mousemove", updateMousePosition, false);
         console.log('The pointer lock status is now locked');
       } else {
@@ -301,50 +283,8 @@
 
       //Opis sceny 3D, położenie punktów w przestrzeni 3D w formacie X,Y,Z 
       let vertexPosition = [
-        //Top
-        // -1.0, +1.0, -1.0, -1.0, +1.0, +1.0, +1.0, +1.0, +1.0, //3 punkty po 3 składowe - X1,Y1,Z1, X2,Y2,Z2, X3,Y3,Z3 - 1 trójkąt
-        // -1.0, +1.0, -1.0, +1.0, +1.0, +1.0, +1.0, +1.0, -1.0,
-        //Left
-        // -1.0, -1.0, +1.0, -1.0, +1.0, +1.0, -1.0, -1.0, -1.0,
-        // -1.0, -1.0, -1.0, -1.0, +1.0, +1.0, -1.0, +1.0, -1.0,
-        //Right
-        // +1.0, +1.0, +1.0, +1.0, -1.0, +1.0, +1.0, -1.0, -1.0,
-        // +1.0, +1.0, +1.0, +1.0, -1.0, -1.0, +1.0, +1.0, -1.0,
-        //Front
-        // +1.0, -1.0, +1.0, +1.0, +1.0, +1.0, -1.0, -1.0, +1.0,
-        // -1.0, +1.0, +1.0, -1.0, -1.0, +1.0, +1.0, +1.0, +1.0,
-        //Back
-        // +1.0, +1.0, -1.0, +1.0, -1.0, -1.0, -1.0, -1.0, -1.0,
-        // +1.0, +1.0, -1.0, -1.0, -1.0, -1.0, -1.0, +1.0, -1.0,
-        //Bottom
-        // -1.0, -1.0, +1.0, -1.0, -1.0, -1.0, +1.0, -1.0, +1.0,
-        // +1.0, -1.0, +1.0, -1.0, -1.0, -1.0, +1.0, -1.0, -1.0,
-      ]
 
-      // var planetMove = 6;
-      // for (var i = 2; i < 11; i++) {
-      //   vertexPosition.push(
-      //     //Top
-      //     -planetMove, +1.0, -1.0, -planetMove, +1.0, +1.0, -planetMove + 2, +1.0, +1.0,
-      //     -planetMove, +1.0, -1.0, -planetMove + 2, +1.0, +1.0, -planetMove + 2, +1.0, -1.0,
-      //     //Left
-      //     -planetMove, -1.0, +1.0, -planetMove, +1.0, +1.0, -planetMove, -1.0, -1.0,
-      //     -planetMove, -1.0, -1.0, -planetMove, +1.0, +1.0, -planetMove, +1.0, -1.0,
-      //     //Right
-      //     -planetMove + 2, +1.0, +1.0, -planetMove + 2, -1.0, +1.0, -planetMove + 2, -1.0, -1.0,
-      //     -planetMove + 2, +1.0, +1.0, -planetMove + 2, -1.0, -1.0, -planetMove + 2, +1.0, -1.0,
-      //     //Front
-      //     -planetMove + 2, -1.0, +1.0, -planetMove + 2, +1.0, +1.0, -planetMove, -1.0, +1.0,
-      //     -planetMove, +1.0, +1.0, -planetMove, -1.0, +1.0, -planetMove + 2, +1.0, +1.0,
-      //     //Back
-      //     -planetMove + 2, +1.0, -1.0, -planetMove + 2, -1.0, -1.0, -planetMove, -1.0, -1.0,
-      //     -planetMove + 2, +1.0, -1.0, -planetMove, -1.0, -1.0, -planetMove, +1.0, -1.0,
-      //     //Bottom
-      //     -planetMove, -1.0, +1.0, -planetMove, -1.0, -1.0, -planetMove + 2, -1.0, +1.0,
-      //     -planetMove + 2, -1.0, +1.0, -planetMove, -1.0, -1.0, -planetMove + 2, -1.0, -1.0,
-      //   )
-      //   planetMove += 2 * i;
-      // }
+      ]
 
       var transformX = 2;
       var transformY = 0;
@@ -408,7 +348,6 @@
         for (let i = -90; i < 90; i += stepElevation) {
           for (let j = 0; j < 360; j += stepAngle) {
             vertexCoords.push(...createRectCoords(0, (((i + 180 * (count - 1)) + 90) / 180) / 9, 0.01, 0, (((i + 180 * (count - 1)) + 90) / 180) / 9, 0.1 / 9));
-            //vertexCoords.push(...createRectCoords(0, 0.15, 0.1, 0, 0.15, 0.1));
           }
         }
       }
@@ -435,12 +374,12 @@
       for (let i = 0; i < vertexPosition.length / 9; i++) {
         if (i < 298) {
           vertexNormal.push(...createNormal1(vertexPosition[i * 9 + 0], vertexPosition[i * 9 + 1], vertexPosition[i * 9 + 2],
-            vertexPosition[i * 9 + 3], vertexPosition[i * 9 + 4], vertexPosition[i * 9 + 5],
-            vertexPosition[i * 9 + 6], vertexPosition[i * 9 + 7], vertexPosition[i * 9 + 8]));
+                  vertexPosition[i * 9 + 3], vertexPosition[i * 9 + 4], vertexPosition[i * 9 + 5],
+                  vertexPosition[i * 9 + 6], vertexPosition[i * 9 + 7], vertexPosition[i * 9 + 8]));
         } else {
           vertexNormal.push(...createNormal(vertexPosition[i * 9 + 0], vertexPosition[i * 9 + 1], vertexPosition[i * 9 + 2],
-            vertexPosition[i * 9 + 3], vertexPosition[i * 9 + 4], vertexPosition[i * 9 + 5],
-            vertexPosition[i * 9 + 6], vertexPosition[i * 9 + 7], vertexPosition[i * 9 + 8]));
+                  vertexPosition[i * 9 + 3], vertexPosition[i * 9 + 4], vertexPosition[i * 9 + 5],
+                  vertexPosition[i * 9 + 6], vertexPosition[i * 9 + 7], vertexPosition[i * 9 + 8]));
         }
       }
 
@@ -493,7 +432,7 @@
       gl.useProgram(shaderProgram)   //Użycie przygotowanego programu shaderowego
 
       gl.enable(gl.DEPTH_TEST);           // Włączenie testu głębi - obiekty bliższe mają przykrywać obiekty dalsze
-      gl.depthFunc(gl.LEQUAL);            // 
+      gl.depthFunc(gl.LEQUAL);            //
 
       gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "uPMatrix"), false, new Float32Array(uPMatrix)); //Wgranie macierzy kamery do pamięci karty graficznej
       gl.uniformMatrix4fv(gl.getUniformLocation(shaderProgram, "uMVMatrix"), false, new Float32Array(uMVMatrix));
@@ -524,23 +463,13 @@
 
       setTimeout(Tick, 1);
     }
-    function handlekeydown(e) {
-      if (e.keyCode == 87) angleX = angleX + 15; //W
-      if (e.keyCode == 83) angleX = angleX - 15; //S
-      if (e.keyCode == 68) angleY = angleY + 15;
-      if (e.keyCode == 65) angleY = angleY - 15;
-      if (e.keyCode == 81) angleZ = angleZ + 15;
-      if (e.keyCode == 69) angleZ = angleZ - 15;
-      //alert(e.keyCode);
-      //alert(angleX);
-    }
   </script>
 </head>
 
 <body onload="startGL()" onkeydown="move(event)">
-  <canvas id="canvas3D" width="640" height="480" style="border: solid black 1px"></canvas>
-  <input type="checkbox" onclick="steeringChange(this);"> Czy obliczać składowe wektora?
-  <img id="textureImg" src="Tex.jpg">
+<canvas id="canvas3D" width="640" height="480" style="border: solid black 1px"></canvas>
+<input type="checkbox" onclick="steeringChange(this);"> Czy obliczać składowe wektora?
+<img id="textureImg" src="Tex.jpg">
 </body>
 
 

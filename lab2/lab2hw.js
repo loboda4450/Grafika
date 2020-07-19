@@ -6,7 +6,6 @@ var vertexPositionBuffer;
 var vertexColorBuffer;
 
 function startGL() {
-    alert("Started webGL");
     let canvas = document.getElementById("canvas");
     gl = canvas.getContext("experimental-webgl");
     gl.viewportWidth = canvas.width;
