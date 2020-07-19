@@ -137,7 +137,7 @@
                 return null;
             }
 
-            shaderProgram = gl.createProgram(); //Stworzenie obiektu programu 
+            shaderProgram = gl.createProgram();
             gl.attachShader(shaderProgram, vertexShader); //Podpięcie obu shaderów do naszego programu wykonywanego na karcie graficznej
             gl.attachShader(shaderProgram, fragmentShader);
             gl.linkProgram(shaderProgram);
